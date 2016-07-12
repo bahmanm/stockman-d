@@ -39,7 +39,11 @@ public auto load(string path, int nHeaderLine=1)
 
 unittest
 {
-  
+  auto result = load("./test/sales-invoices-tiny.csv").array;
+  assert(result.length == 3);
+  assert(result.filter!(si => si.docNo == "SI-862").array[0].lines.length == 4);
+  assert(result.filter!(si => si.docNo == "SI-758").array[0].lines.length == 10);
+  assert(result.filter!(si => si.docNo == "SI-548").array[0].lines.length == 13);
 }
 
 /**
