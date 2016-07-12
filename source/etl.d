@@ -13,7 +13,7 @@ private import std.algorithm.iteration : fold, map, filter, chunkBy;
 private import std.typecons : tuple, Tuple;
 private import std.array : split, array;
 private import std.conv : to;
-private import std.range : drop;
+private import std.range : drop, dropOne;
 private import models;
 
 
@@ -108,8 +108,7 @@ private auto combineOneLiners(R)(R oneLiners)
   return oneLiners.chunkBy!(si => si.docNo).map!(
     function SInvoice(ref auto group) {
       auto refInvoice = group[1].front;
-      group[1].popFront();
-      return group[1].fold!(
+      return group[1].dropOne().fold!(
         function SInvoice(SInvoice fixed, SInvoice oneLiner) {
           fixed.lines ~= oneLiner.lines[0];
           return fixed;
