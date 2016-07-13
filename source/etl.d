@@ -8,13 +8,14 @@
 module etl;
 
 private import std.stdio : writeln, File;
-private import std.algorithm : each, map;
+private import std.algorithm : each, map, sort;
 private import std.algorithm.iteration : fold, map, filter, chunkBy;
 private import std.typecons : tuple, Tuple;
 private import std.array : split, array;
 private import std.conv : to;
-private import std.range : drop, dropOne;
+private import std.range : drop, dropOne, takeOne, front;
 private import models;
+private import rangeutils : groupBy;
 
 
 /**
@@ -29,12 +30,11 @@ private import models;
 public auto load(string path, int nHeaderLine=1)
 {
   //TODO check for file existence
-  return combineOneLiners(
-    File(path)
+  return File(path)
     .byLine
     .drop(nHeaderLine)
     .map!(line => tranformLine(line))
-  );    
+    .combineOneLiners();
 }
 
 unittest
@@ -58,7 +58,7 @@ unittest
  */
 private auto tranformLine(in char[] line)
 {
-  auto fields = line.split(',');
+  auto fields = line.split(',');  
   return SInvoice(
     to!string(fields[0]),   // docNo
     to!string(fields[2]),   // customer
@@ -80,19 +80,19 @@ private auto tranformLine(in char[] line)
 unittest 
 {
   auto si = tranformLine(
-    "SI-368,C551,2016/1/17,256799.49,17,1,P-3731,6,2.60,15.60"
+    "SI-368,C551,2016/1/17,256799.40,17,1,P-3731,6,2.60,15.61"
   );
   assert(si.docNo == "SI-368");
   assert(si.customer == "C551");
   assert(si.docDate == "2016/1/17");
   assert(si.discount == 17);
-  assert(si.totalAmt == 256_799.49);
+  assert(si.totalAmt == 256_799.40);
   assert(si.lines.length == 1);
   assert(si.lines[0].lineNo == 1);
   assert(si.lines[0].product == "P-3731");
   assert(si.lines[0].qty == 6);
   assert(si.lines[0].price == 2.60);
-  assert(si.lines[0].lineAmt == 15.60);
+  assert(si.lines[0].lineAmt == 15.61);
 }
 
 /**
@@ -105,37 +105,49 @@ unittest
  */
 private auto combineOneLiners(R)(R oneLiners)
 {
-  return oneLiners.chunkBy!(si => si.docNo).map!(
-    function SInvoice(ref auto group) {
-      auto refInvoice = group[1].front;
-      return group[1].dropOne().fold!(
-        function SInvoice(SInvoice fixed, SInvoice oneLiner) {
-          fixed.lines ~= oneLiner.lines[0];
-          return fixed;
-        }
-      )(refInvoice);
-    }
-  );
+  return oneLiners
+    .groupBy!(si => si.docNo)
+    .byKeyValue()
+    .map!(
+      (kv) {
+        auto refInvoice = kv.value.front;
+        return kv.value.dropOne().fold!(
+          (fixed, oneLiner) {
+            fixed.lines ~= oneLiner.lines[0];
+            return fixed;
+          }
+        )(refInvoice);
+      }
+    ).map!(
+      (si) {
+        sort!(
+          (l1, l2) => l1.lineNo < l2.lineNo
+        )(si.lines);
+        return si;
+      }
+    );
 }
 
 unittest 
 {
   auto si1 = SInvoice(
     "D1", "DATE", "CUST1", 0.0, 100.0, 
-    [SInvoiceLine(1, "P1", 10, 5.0, 50.0)]
+    [SInvoiceLine(2, "P1", 10, 5.0, 50.0)]
   );
   auto si2 = SInvoice(
     "D1", "DATE", "CUST1", 0.0, 100.0, 
-    [SInvoiceLine(2, "P2", 2, 25.0, 50.0)]
+    [SInvoiceLine(1, "P2", 2, 25.0, 50.0)]
   );
   auto si3 = SInvoice(
     "D2", "DATE", "CUST1", 0.0, 100.0,
     [SInvoiceLine(1, "P1", 20, 5.0, 100.0)]
   );
-  auto result = combineOneLiners([si1, si2, si3]).array;
+  auto result = [si1, si2, si3].combineOneLiners.array;
   assert(result.length == 2);
   assert(result.filter!(si => si.docNo == "D1").array.length == 1);
   assert(result.filter!(si => si.docNo == "D1").array[0].lines.length == 2);
+  assert(result.filter!(si => si.docNo == "D1").array[0].lines[0].lineNo == 1);
+  assert(result.filter!(si => si.docNo == "D1").array[0].lines[1].lineNo == 2);
   assert(result.filter!(si => si.docNo == "D2").array.length == 1);
   assert(result.filter!(si => si.docNo == "D2").array[0].lines.length == 1);
 }
