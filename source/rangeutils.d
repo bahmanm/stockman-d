@@ -93,12 +93,20 @@ unittest {
   );
 }
 
-/**/
-public auto all(alias clause, R)(R r)
+/**
+ * Checks if a given predicate returns true on all elements of a given ranage.
+ * For example:
+ *   assert([1,2,3].all(i => i<4))
+ * 
+ * Params:
+ *  r = the given range
+ * Returns: true if 'pred' returns true for all elements in 'r'
+ */
+public auto all(alias pred, R)(R r)
   if (isInputRange!R)
 {
   return r.fold!(
-    (acc, e) => acc && clause(e)
+    (acc, e) => acc && pred(e)
   )(true);
 }
 
@@ -107,13 +115,23 @@ unittest {
   assert(![1,2,5].all!(i => i % 2 == 1));
 }
 
-/**/
+/**
+ * Checks if a given range contains a given element.
+ * For example:
+ *   assert([1,2,3].contains(1))
+ *   assert(![1,2,3].contains(4))
+ * 
+ * Params:
+ *  r = the given range
+ *  obj = the given element to look for
+ * Returns: true if 'r' contains 'obj'
+ */
 public auto contains(R, E)(R r, E obj)
   if (isInputRange!R && is(E == ElementType!R))
 {
+  //TODO don't use 'filter'
   return !r.filter!(e => obj == e).empty;
 }
-
 
 unittest {
   assert([1,2,3].contains(2));
