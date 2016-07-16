@@ -2,7 +2,7 @@
 Implementation of Stockman in D.
 Stockman is my favourite exercise to learn a new programming language.
 
-# v1.0 # 
+# v1.0 #
 1. Read a CSV file into memory which contain sales invoice lines.
 2. Pretty print the invoices.
 
