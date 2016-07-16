@@ -2,9 +2,12 @@
 Implementation of Stockman in D.
 Stockman is my favourite exercise to learn a new programming language.
 
-# v1.0 #
+# v1.0 # 
 1. Read a CSV file into memory which contain sales invoice lines.
 2. Pretty print the invoices.
+
+### Status ###
+Done.  Available at bfa4c825 (TAG-v1.0).
 
 # v2.0 #
 1. Read a CSV file into memory which contain sales invoice lines.
@@ -16,6 +19,9 @@ Stockman is my favourite exercise to learn a new programming language.
 7. Find the customer with the largest total sales.
 8. Find the 3 customers with the least total sales and print a descending list in the form "customer, total".
 9. Find the date with the largest total sales amount.
+
+### Status ###
+WIP.
 
 
 # License #
