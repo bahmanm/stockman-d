@@ -19,17 +19,17 @@ private import rangeutils : groupBy;
 
 
 /**
- * Loads a file into an array of strings by line.
+ * Loads a file containing sales invoice lines into a range of `SInvoice`es.
+ * Note that it assumes $(DPARAM path) exists and is a readable file.
  * 
  * Params:
  *  path = the path to the file
  *  nHeaderLine = number of headers lines to discard when reading the
  *    file (defaults to 1)
- * Returns: a range of SInvoices.
+ * Returns: a range of `SInvoice`es.
  */
 public auto load(string path, int nHeaderLine=1)
 {
-  //TODO check for file existence
   return File(path)
     .byLine
     .drop(nHeaderLine)
@@ -37,6 +37,7 @@ public auto load(string path, int nHeaderLine=1)
     .combineOneLiners();
 }
 
+///
 unittest
 {
   auto result = load("./test/sales-invoices-tiny.csv").array;
@@ -54,7 +55,7 @@ unittest
  * 
  * Params:
  *  line = the given line of input
- * Returns: a SalesInvoice
+ * Returns: an `SInvoice`
  */
 private auto tranformLine(in char[] line)
 {

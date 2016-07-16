@@ -13,30 +13,21 @@ private import std.typecons;
 private import std.traits;
 
 /**
- * Groups a given range into partitions based on a given 'groupBy' clause.
+ * Groups a given range into partitions based on a given "groupBy" clause.
  * Each group is identified by a key and consists of all elements of the range
  * with the same key.
- * 
- * For example:
- *   ["hi", "bahman", "nahid", "by", "sunny"].groupBy!(s => s.length)
- * wil yield:
- * [
- *  2: ["hi", "by"],
- *  6: ["bahman"],
- *  5: ["nahid", "sunny"]
- * ]
  * 
  * Note that there is no guarantee on the order of the AA keys.
  * 
  * Params:
  *  r = the given range
- *  clause = the 'groupBy' clause; a unary function with the signature
- *    GroupKeyType function(RangeElementType)
- * Returns: an AA of type ElemType[][GroupKeyType]
+ *  clause = the "groupBy" clause; a unary function with the signature
+ *    `GroupKeyType function(RangeElementType)`
+ * Returns: an AA of type `ElemType[][GroupKeyType]`
  * 
  */
 public template groupBy(alias clause, Range)
-   if (isInputRange!Range)
+  if (isInputRange!Range)
 {
   static alias ElemType = ElementType!Range;
   static alias GroupKeyType = typeof(clause(ElemType.init));
@@ -55,6 +46,7 @@ public template groupBy(alias clause, Range)
   }
 }
 
+///
 unittest {
   // group strings by length
   const result1 = ["hi", "bahman", "nahid", "by", "sunny"]
@@ -95,12 +87,11 @@ unittest {
 
 /**
  * Checks if a given predicate returns true on all elements of a given ranage.
- * For example:
- *   assert([1,2,3].all(i => i<4))
  * 
  * Params:
  *  r = the given range
- * Returns: true if 'pred' returns true for all elements in 'r'
+ * Returns: true if $(D_PARAM pred) returns true for all elements in 
+ *  $(D_PARAM r)
  */
 public auto all(alias pred, R)(R r)
   if (isInputRange!R)
@@ -110,6 +101,7 @@ public auto all(alias pred, R)(R r)
   )(true);
 }
 
+///
 unittest {
   assert([1,3,5].all!(i => i % 2 == 1));
   assert(![1,2,5].all!(i => i % 2 == 1));
@@ -117,14 +109,11 @@ unittest {
 
 /**
  * Checks if a given range contains a given element.
- * For example:
- *   assert([1,2,3].contains(1))
- *   assert(![1,2,3].contains(4))
  * 
  * Params:
  *  r = the given range
  *  obj = the given element to look for
- * Returns: true if 'r' contains 'obj'
+ * Returns: true if $(D_PARAM r) contains $(D_PARAM obj)
  */
 public auto contains(R, E)(R r, E obj)
   if (isInputRange!R && is(E == ElementType!R))
@@ -133,6 +122,7 @@ public auto contains(R, E)(R r, E obj)
   return !r.filter!(e => obj == e).empty;
 }
 
+///
 unittest {
   assert([1,2,3].contains(2));
   assert(![1,2,3].contains(20));
