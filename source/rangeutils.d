@@ -193,3 +193,74 @@ unittest
     max!((i, j) => i - j)(cast(int[])null)
   );
 }
+
+/**
+ * Finds the minimum element in a given range according to `comp` (comparator).
+ * If two elements compete, the one closer to front of the range will win.
+ * 
+ * Params:
+ *  r = the given `range`.
+ *  comp = the (binary) comparator; should return an `int` (-1, 0, 1).
+ * Returns: The minimum element of `r` according to `comp`.
+ */
+public auto min(alias comp, Range)(Range r)
+in {
+  assert(r != null && !r.empty);
+}
+body {
+  auto seed = r.front;
+  return r.dropOne.fold!(
+    (acc, val) => comp(val, acc) < 0 ? val : acc
+  )(seed);
+}
+
+///
+unittest
+{
+  // one element range
+  assert(
+    [1].min!((i, j) => i - j) == 1
+  );
+  
+  // min of an int range
+  assert(
+    [4, 1, 2, 3].min!((i, j) => i - j) == 1
+  );
+  
+  // longest of a string range 
+  assert(
+    ["hi", "bahman", "nahid", "sunny"].min!(
+      (s1, s2) => s1.length < s2.length ? -1 : 0
+    ) == "hi"
+  );
+  assert(
+    ["hi", "by", "bahman", "nahid", "sunny"].min!(
+      (s1, s2) => s1.length < s2.length ? -1 : 0
+    ) == "hi"
+  );
+  
+  // max of a range of structs
+  struct S {
+    public int i, j;
+  }
+  assert(
+    [
+      S(-1, 1), S(2, 0), S(100, -100), S(1, 1)
+    ].min!(
+      (s1, s2) => s1.i * s1.j - s2.i * s2.j
+    ) == S(100, -100)
+  );
+}
+
+unittest
+{
+  import core.exception : AssertError;
+  import std.exception : assertThrown;
+  
+  assertThrown!AssertError(
+    min!((i, j) => i - j)(cast(int[])[])
+  );
+  assertThrown!AssertError(
+    min!((i, j) => i - j)(cast(int[])null)
+  );
+}
