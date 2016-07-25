@@ -139,7 +139,7 @@ unittest {
  */
 public auto max(alias comp, Range)(Range r)
 in {
-  assert(r != null && !r.empty);
+  assert(!r.empty);
 }
 body {
   auto seed = r.front;
@@ -205,7 +205,7 @@ unittest
  */
 public auto min(alias comp, Range)(Range r)
 in {
-  assert(r != null && !r.empty);
+  assert(!r.empty);
 }
 body {
   auto seed = r.front;
