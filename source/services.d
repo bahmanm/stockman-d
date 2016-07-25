@@ -4,8 +4,9 @@
 module services;
 
 private import models : SInvoice, SInvoiceLine;
-private import std.algorithm.iteration : fold;
+private import std.algorithm.iteration : fold, map;
 private import rangeutils : max;
+private import std.typecons : Tuple;
 
 /**
  * Calculates the sum of total amounts of an array of invoices.
@@ -73,5 +74,49 @@ unittest
       SInvoice("d1", "20160101", "c1", 0.0, 50.61, []),
       SInvoice("d1", "20160101", "c1", 0.0, 20.01, [])
     ]) == SInvoice("d1", "20160101", "c1", 0.0, 200.0, [])
+  );
+}
+
+/**
+ * Finds the most expensive product (based on price) in an array
+ * of invoices.
+ * 
+ * Params:
+ *  invoices = the given array of invoices
+ * Return: the product name  
+ */
+public string mostExpensiveProduct(SInvoice[] invoices)
+in {
+  assert(invoices != null && invoices.length > 0);
+}
+body {
+  alias ProdPrice = Tuple!(string, "product", double, "price");
+  return invoices.map!(
+    (invoice) => invoice.lines.map!(
+      (line) {
+        auto pp = new ProdPrice;
+        pp.product = line.product;
+        pp.price = line.price;
+        return pp;
+      }
+    )
+  ).map!(  // the most expensive product in each invoice
+    (prodPrices) => prodPrices.max!(
+      (pp1, pp2) => pp1.price - pp2.price
+    ) 
+  ).max!( // the most expensive product of all invoices
+    (pp1, pp2) => pp1.price - pp2.price
+  ).product;
+}
+
+///
+unittest
+{
+  import etl : load;
+  import std.range : array;
+  assert(
+    mostExpensiveProduct(
+      load("test/sales-invoices-tiny.csv").array
+    ) == "P-0674"
   );
 }
