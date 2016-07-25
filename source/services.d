@@ -5,6 +5,7 @@ module services;
 
 private import models : SInvoice, SInvoiceLine;
 private import std.algorithm.iteration : fold;
+private import rangeutils : max;
 
 /**
  * Calculates the sum of total amounts of an array of invoices.
@@ -38,5 +39,39 @@ unittest
       SInvoice("d1", "20160101", "c1", 0.0, 50.61, []),
       SInvoice("d1", "20160101", "c1", 0.0, 20.01, [])
     ]) == 370.62
+  );
+}
+
+/**
+ * Finds the most expensive invoice (based on total amount)
+ * in an array of invoices. 
+ * 
+ * Params:
+ *  invoices = the given array of invoices
+ * Return: the invoice with the largest total amount
+ */
+public SInvoice mostExpensive(SInvoice[] invoices)
+in {
+  assert(invoices != null && invoices.length > 0);
+}
+body {
+  return invoices.max!((i1, i2) => i1.totalAmt - i2.totalAmt);
+}
+
+///
+unittest
+{
+  assert(
+    mostExpensive([
+      SInvoice("d1", "20160101", "c1", 0.0, 10.66, [])
+    ]) == SInvoice("d1", "20160101", "c1", 0.0, 10.66, [])
+  );
+  assert(
+    mostExpensive([
+      SInvoice("d1", "20160101", "c1", 0.0, 100.0, []),
+      SInvoice("d1", "20160101", "c1", 0.0, 200.0, []),
+      SInvoice("d1", "20160101", "c1", 0.0, 50.61, []),
+      SInvoice("d1", "20160101", "c1", 0.0, 20.01, [])
+    ]) == SInvoice("d1", "20160101", "c1", 0.0, 200.0, [])
   );
 }
