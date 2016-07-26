@@ -7,6 +7,9 @@ private import models : SInvoice, SInvoiceLine;
 private import std.algorithm.iteration : fold, map, joiner;
 private import rangeutils : max, groupBy;
 private import std.typecons : Tuple;
+private import std.algorithm.sorting : sort;
+private import std.range : take;
+private import std.math : cmp;
 
 /**
  * Calculates the sum of total amounts of an array of invoices.
@@ -286,5 +289,54 @@ unittest
   assert(
     result.customer == "C-640" && approxEqual(result.total, 202_668.46)
   );
+}
+
+/**
+ * Finds the customers with least total sales in an array of invoices.
+ * 
+ * Params:
+ *  invoices = the given invoices
+ *  nCustomers = how many customers should it return (defaults to 1)
+ * Returns: a range of tuples of type 
+ *  `Tuple!(string, "customer", double, "total")`
+ */
+public auto customersWithMinTotal(SInvoice[] invoices, int nCustomers=1)
+in
+{
+  assert(invoices.length > 0 && nCustomers > 0);
+}
+body
+{
+  import std.range : array;
+  alias CS = Tuple!(string, "customer", double, "total");
+  return sort!(
+    (cs1, cs2) => cmp(cs1.total, cs2.total) < 0
+  )(
+    totalByCustomer(invoices).array
+  ).take(nCustomers);
+}
+
+///
+unittest
+{
+  import etl : load;
+  import std.range : array;
+  import std.math : cmp, approxEqual;
+  import std.algorithm.comparison : equal;
   
+  alias cs = Tuple!(string, "customer", double, "total");
+  const actual = customersWithMinTotal(
+    load("test/sales-invoices-for-total-per-customer.csv").array,
+    2
+  ).array;
+  const expected = [
+    new cs("C-781", 627.67),
+    new cs("C-078", 6_505.58)
+  ];
+  assert(
+    equal!(
+      (cs1, cs2) => 
+        cs1.customer == cs2.customer && approxEqual(cs1.total, cs2.total)
+    )(actual, expected)
+  );
 }
