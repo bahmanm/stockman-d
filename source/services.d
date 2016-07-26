@@ -167,10 +167,8 @@ body
 unittest
 {
   import etl : load;
-  import std.range : zip, array;
+  import std.range : array;
   import std.algorithm.comparison : equal;
-  import std.stdio : writeln;
-  import std.algorithm.iteration : each;
   import std.algorithm.sorting : sort;
   import std.math : cmp, approxEqual;
 
@@ -228,10 +226,8 @@ body
 unittest
 {
   import etl : load;
-  import std.range : zip, array;
+  import std.range : array;
   import std.algorithm.comparison : equal;
-  import std.stdio : writeln;
-  import std.algorithm.iteration : each;
   import std.algorithm.sorting : sort;
   import std.math : cmp, approxEqual;
 
