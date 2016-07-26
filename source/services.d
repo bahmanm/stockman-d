@@ -127,7 +127,8 @@ unittest
  * 
  * Params:
  *  invoices = the given invoices
- * Return: a range of tuples of type `Tuple!(string, "product", double, "price")`
+ * Return: a range of tuples of type 
+ *  `Tuple!(string, "product", double, "price")`
  */
 public auto avgProductPrices(SInvoice[] invoices)
 in 
@@ -192,5 +193,66 @@ unittest
     equal!(
       (t1, t2) => t1.product == t2.product && approxEqual(t1.price, t2.price)
     )(actualAvgPrices, expectedAvgPrices)
+  );
+}
+
+/**
+ * Calculates the total sales per customer from an array of invoices.
+ * 
+ * Params:
+ *  invoices = the given invoices
+ * Return: a range of tuples of type 
+ *  `Tuple!(string, "customer", double, "total")`
+ */
+public auto totalByCustomer(SInvoice[] invoices)
+in 
+{
+  assert(invoices.length > 0);
+}
+body
+{
+  alias CS = Tuple!(string, "customer", double, "total");
+  return invoices.groupBy!(
+    (t) => t.customer
+  ).byKeyValue().map!(
+    (kv) => new CS(
+      kv.key(), 
+      kv.value.fold!(
+        (sum, invoice) => sum + invoice.totalAmt
+      )(0.0)
+    )
+  );
+}
+
+///
+unittest
+{
+  import etl : load;
+  import std.range : zip, array;
+  import std.algorithm.comparison : equal;
+  import std.stdio : writeln;
+  import std.algorithm.iteration : each;
+  import std.algorithm.sorting : sort;
+  import std.math : cmp, approxEqual;
+
+  auto actualSales = sort!(
+    (cs1, cs2) => cmp(cs1.total, cs2.total) > 0
+  )(
+    totalByCustomer(
+      load("test/sales-invoices-for-total-per-customer.csv").array
+    ).array
+  );
+
+  alias cs = Tuple!(string, "customer", double, "total");
+  auto expectedSales = [
+    new cs("C-640", 202_668.46),
+    new cs("C-621", 60_508.97),
+    new cs("C-078", 6_505.58),
+    new cs("C-781", 627.67)
+  ];
+  assert(
+    equal!(
+      (t1, t2) => t1.customer == t2.customer && approxEqual(t1.total, t2.total)
+    )(actualSales, expectedSales)
   );
 }
