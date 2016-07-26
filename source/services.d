@@ -17,7 +17,7 @@ private import std.typecons : Tuple;
  */
 public double totalSales(SInvoice[] invoices)
 in {
-  assert(invoices != null && invoices.length > 0);
+  assert(invoices.length > 0);
 }
 body {
   return invoices.fold!(
@@ -53,7 +53,7 @@ unittest
  */
 public SInvoice mostExpensive(SInvoice[] invoices)
 in {
-  assert(invoices != null && invoices.length > 0);
+  assert(invoices.length > 0);
 }
 body {
   return invoices.max!((i1, i2) => i1.totalAmt - i2.totalAmt);
@@ -87,7 +87,7 @@ unittest
  */
 public string mostExpensiveProduct(SInvoice[] invoices)
 in {
-  assert(invoices != null && invoices.length > 0);
+  assert(invoices.length > 0);
 }
 body {
   alias ProdPrice = Tuple!(string, "product", double, "price");
