@@ -15,7 +15,7 @@ private import std.typecons : Tuple;
  *  invoices = the given invoices
  * Return: the sum of total amounts
  */
-public double totalSales(SInvoice[] invoices)
+public auto totalSales(SInvoice[] invoices)
 in {
   assert(invoices.length > 0);
 }
@@ -51,7 +51,7 @@ unittest
  *  invoices = the given array of invoices
  * Return: the invoice with the largest total amount
  */
-public SInvoice mostExpensive(SInvoice[] invoices)
+public auto mostExpensive(SInvoice[] invoices)
 in {
   assert(invoices.length > 0);
 }
@@ -85,7 +85,7 @@ unittest
  *  invoices = the given array of invoices
  * Return: the product name  
  */
-public string mostExpensiveProduct(SInvoice[] invoices)
+public auto mostExpensiveProduct(SInvoice[] invoices)
 in {
   assert(invoices.length > 0);
 }
