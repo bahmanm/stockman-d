@@ -256,3 +256,39 @@ unittest
     )(actualSales, expectedSales)
   );
 }
+
+/**
+ * Finds the customer with largest total sales in an array of invoices.
+ * 
+ * Params:
+ *  invoices = the given invoices
+ * Return: a tuple of type `Tuple!(string, "customer", double, "total")`
+ */
+public auto customerWithMaxTotal(SInvoice[] invoices)
+in 
+{
+  assert(invoices.length > 0);
+}
+body
+{
+  return totalByCustomer(invoices).max!(
+    (cs1, cs2) => cs1.total - cs2.total
+  );
+}
+
+///
+unittest
+{
+  import etl : load;
+  import std.range : array;
+  import std.math : cmp, approxEqual;
+  
+  alias cs = Tuple!(string, "customer", double, "total");
+  auto result = customerWithMaxTotal(
+    load("test/sales-invoices-for-total-per-customer.csv").array
+  );
+  assert(
+    result.customer == "C-640" && approxEqual(result.total, 202_668.46)
+  );
+  
+}
