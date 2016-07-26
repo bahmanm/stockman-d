@@ -16,10 +16,12 @@ private import std.typecons : Tuple;
  * Return: the sum of total amounts
  */
 public auto totalSales(SInvoice[] invoices)
-in {
+in 
+{
   assert(invoices.length > 0);
 }
-body {
+body 
+{
   return invoices.fold!(
     (acc, invoice) => acc + invoice.totalAmt
   )(0.0);
@@ -52,10 +54,12 @@ unittest
  * Return: the invoice with the largest total amount
  */
 public auto mostExpensive(SInvoice[] invoices)
-in {
+in 
+{
   assert(invoices.length > 0);
 }
-body {
+body 
+{
   return invoices.max!((i1, i2) => i1.totalAmt - i2.totalAmt);
 }
 
@@ -86,10 +90,12 @@ unittest
  * Return: the product name  
  */
 public auto mostExpensiveProduct(SInvoice[] invoices)
-in {
+in 
+{
   assert(invoices.length > 0);
 }
-body {
+body 
+{
   alias ProdPrice = Tuple!(string, "product", double, "price");
   return invoices.map!(
     (invoice) => invoice.lines.map!(
@@ -120,3 +126,4 @@ unittest
     ) == "P-0674"
   );
 }
+
