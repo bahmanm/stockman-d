@@ -4,8 +4,8 @@
 module services;
 
 private import models : SInvoice, SInvoiceLine;
-private import std.algorithm.iteration : fold, map;
-private import rangeutils : max;
+private import std.algorithm.iteration : fold, map, joiner;
+private import rangeutils : max, groupBy;
 private import std.typecons : Tuple;
 
 /**
@@ -119,5 +119,78 @@ unittest
     mostExpensiveProduct(
       load("test/sales-invoices-tiny.csv").array
     ) == "P-0674"
+  );
+}
+
+/**
+ * Calculates the average price of each product in an array of invoices.
+ * 
+ * Params:
+ *  invoices = the given invoices
+ * Return: a range of tuples of type `Tuple!(string, "product", double, "price")`
+ */
+public auto avgProductPrices(SInvoice[] invoices)
+in 
+{
+  assert(invoices.length > 0);
+}
+body 
+{
+  import std.range : array;
+  alias PP = Tuple!(string, "product", double, "price");
+  alias AvgData = Tuple!(double, "sum", size_t, "count");
+  return invoices.map!(
+    (invoice) => invoice.lines.map!(
+      (line) => new PP(line.product, line.price)
+    )
+  ).joiner().groupBy!(
+    (pp) => pp.product
+  ).byKeyValue().map!(
+    (kv) {
+      auto result = new PP;
+      result.product = kv.key;
+      const auto avgData = kv.value.fold!(
+        (acc, pp) {
+          acc.sum += pp.price;
+          acc.count++;
+          return acc;
+        }
+      )(new AvgData(0.0, 0));
+      result.price = avgData.sum / avgData.count;
+      return result;
+    }
+  );
+}
+
+///
+unittest
+{
+  import etl : load;
+  import std.range : zip, array;
+  import std.algorithm.comparison : equal;
+  import std.stdio : writeln;
+  import std.algorithm.iteration : each;
+  import std.algorithm.sorting : sort;
+  import std.math : cmp, approxEqual;
+
+  auto actualAvgPrices = sort!(
+    (pp1, pp2) => cmp(pp1.price, pp2.price) > 0
+  )(
+    avgProductPrices(
+      load("test/sales-invoices-tiny-recurring-products.csv").array
+    ).array
+  );
+
+  alias pp = Tuple!(string, "product", double, "price");
+  auto expectedAvgPrices = [
+    new pp("P-1887", 23.49),
+    new pp("P-5207", 3.165),
+    new pp("P-9327", 1.59),
+    new pp("P-6294", 0.385)
+  ];
+  assert(
+    equal!(
+      (t1, t2) => t1.product == t2.product && approxEqual(t1.price, t2.price)
+    )(actualAvgPrices, expectedAvgPrices)
   );
 }
