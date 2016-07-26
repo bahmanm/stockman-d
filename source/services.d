@@ -99,12 +99,7 @@ body
   alias ProdPrice = Tuple!(string, "product", double, "price");
   return invoices.map!(
     (invoice) => invoice.lines.map!(
-      (line) {
-        auto pp = new ProdPrice;
-        pp.product = line.product;
-        pp.price = line.price;
-        return pp;
-      }
+      (line) => new ProdPrice(line.product, line.price)
     )
   ).map!(  // the most expensive product in each invoice
     (prodPrices) => prodPrices.max!(
@@ -126,4 +121,3 @@ unittest
     ) == "P-0674"
   );
 }
-
