@@ -151,9 +151,6 @@ body
     (pp) => pp.product
   ).byKeyValue().map!(
     (kv) {
-      //TODO use cleaner PP c'tor syntax
-      auto result = new PP;
-      result.product = kv.key;
       const auto avgData = kv.value.fold!(
         (acc, pp) {
           acc.sum += pp.price;
@@ -161,8 +158,7 @@ body
           return acc;
         }
       )(new AvgData(0.0, 0));
-      result.price = avgData.sum / avgData.count;
-      return result;
+      return new PP(kv.key, avgData.sum / avgData.count);
     }
   );
 }
