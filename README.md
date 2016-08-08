@@ -21,7 +21,7 @@ Done.  Available at bfa4c825 (TAG-v1.0).
 9. Find the date with the largest total sales amount.
 
 ### Status ###
-WIP.
+Done. Available at 2691802a (TAG-v2.0).
 
 
 # License #
