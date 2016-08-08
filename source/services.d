@@ -151,6 +151,7 @@ body
     (pp) => pp.product
   ).byKeyValue().map!(
     (kv) {
+      //TODO use cleaner PP c'tor syntax
       auto result = new PP;
       result.product = kv.key;
       const auto avgData = kv.value.fold!(
@@ -298,7 +299,8 @@ unittest
  *  invoices = the given invoices
  *  nCustomers = how many customers should it return (defaults to 1)
  * Returns: a range of tuples of type 
- *  `Tuple!(string, "customer", double, "total")`
+ *  `Tuple!(string, "customer", double, "total")` sorted ascendingly on
+ *  `total`.
  */
 public auto customersWithMinTotal(SInvoice[] invoices, int nCustomers=1)
 in
@@ -349,7 +351,7 @@ unittest
  *  invoices = the given invoices
  *  nDates = how many dates should it return (defaults to 2)
  * Returns: a range of tuples of type 
- *  `Tuple!(string, "date", double, "total")`
+ *  `Tuple!(string, "date", double, "total")` sorted descendingly on `total`
  */
 public auto datesWithMaxTotal(SInvoice[] invoices, int nDates=2)
 in
