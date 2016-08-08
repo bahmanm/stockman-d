@@ -340,3 +340,65 @@ unittest
     )(actual, expected)
   );
 }
+
+/**
+ * Finds the dates which have the maximum total amount of sales according to an
+ * array of invoices.
+ * 
+ * Params:
+ *  invoices = the given invoices
+ *  nDates = how many dates should it return (defaults to 2)
+ * Returns: a range of tuples of type 
+ *  `Tuple!(string, "date", double, "total")`
+ */
+public auto datesWithMaxTotal(SInvoice[] invoices, int nDates=2)
+in
+{
+  assert(invoices.length > 0);
+}
+body
+{
+  import std.range : array;
+  
+  alias DT = Tuple!(string, "date", double, "total");
+  return sort!(
+    (dt1, dt2) => cmp(dt1.total, dt2.total) > 0
+  )(
+    invoices.map!(
+      i => new DT(i.docDate, i.totalAmt)
+    ).groupBy!(
+      t => t.date
+    ).byKeyValue().map!(
+      kv => new DT(
+        kv.key, 
+        kv.value.fold!(
+          (acc, t) => acc + t.total
+        )(0.0)
+      )
+    ).array
+  ).take(nDates);
+}
+
+///
+unittest
+{
+  import etl : load;
+  import std.range : array;
+  import std.math : cmp, approxEqual;
+  import std.algorithm.comparison : equal;
+  
+  alias dt = Tuple!(string, "date", double, "total");
+  const actual = datesWithMaxTotal(
+    load("test/sales-invoices-tiny-date-max-total.csv").array
+  ).array;
+  const expected = [
+    new dt("2016/2/3", 294_734.47),
+    new dt("2016/2/2", 160_780.8)
+  ];
+  assert(
+    equal!(
+      (cs1, cs2) => 
+        cs1.date == cs2.date && approxEqual(cs1.total, cs2.total)
+    )(actual, expected)
+  );
+}
