@@ -23,6 +23,19 @@ Done.  Available at bfa4c825 (TAG-v1.0).
 ### Status ###
 Done. Available at 2691802a (TAG-v2.0).
 
+# v3.0 #
+1. Read a CSV file into memory which contains product inventory.
+2. Read a CSV file into memory which contain sales invoice lines.
+  3. Check if the product of each line has enough inventory.
+  4. If no, do not impor the invoice the line belongs to (not just the line).
+  5. If yes, import the invoice line and update the inventory of the product
+     accordingly.
+  6. It is important to process the lines in the order they appear in the CSV.
+7. Print a list of invoices listing the problematic line(s) for each invoice.
+
+### Status ###
+WIP
+
 
 # License #
 All files are under [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0), unless otherwise specified.
